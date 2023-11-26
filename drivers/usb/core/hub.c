@@ -2322,16 +2322,23 @@ static int usb_enumerate_device_otg(struct usb_device *udev)
 		} else if (desc->bLength == sizeof
 				(struct usb_otg_descriptor)) {
 			/* Set a_alt_hnp_support for legacy otg device */
-			err = usb_control_msg(udev,
-				usb_sndctrlpipe(udev, 0),
-				USB_REQ_SET_FEATURE, 0,
-				USB_DEVICE_A_ALT_HNP_SUPPORT,
-				0, NULL, 0,
-				USB_CTRL_SET_TIMEOUT);
-			if (err < 0)
-				dev_err(&udev->dev,
-					"set a_alt_hnp_support failed: %d\n",
+			//err = usb_control_msg(udev,
+			//	usb_sndctrlpipe(udev, 0),
+			//	USB_REQ_SET_FEATURE, 0,
+			//	USB_DEVICE_A_ALT_HNP_SUPPORT,
+			//	0, NULL, 0,
+			//	USB_CTRL_SET_TIMEOUT);
+			//if (err < 0)
+			//	dev_err(&udev->dev,
+			//		"set a_alt_hnp_support failed: %d\n",
+			/**
+			 * Some Accessory(GM SGM_Buick NG 2.5 HMI) will not support set a_alt_hnp_support
+			 * This will result in the device failing to enumerate the accessory
+			 */
+			dev_info(&udev->dev,
+					"[okcar] skip set a_alt_hnp_support\n",
 					err);
+			err = 0;
 		}
 	}
 #endif
@@ -2705,10 +2712,12 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
  */
 static bool use_new_scheme(struct usb_device *udev, int retry)
 {
-	if (udev->speed >= USB_SPEED_SUPER)
-		return false;
+	//if (udev->speed >= USB_SPEED_SUPER)
+	//	return false;
 
-	return USE_NEW_SCHEME(retry);
+	//return USE_NEW_SCHEME(retry);
+	// iphone would't use_new_scheme
+	return false;
 }
 
 /* Is a USB 3.0 port in the Inactive or Compliance Mode state?
